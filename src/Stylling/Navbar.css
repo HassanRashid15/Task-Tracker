@@ -1,0 +1,30 @@
+.nav-custom{
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  th, td {
+    padding: 8px;
+    text-align: left;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+
+  .navbar-custom-page{
+    padding-left: 10px !important;
+    padding-right: 19px !important;
+  }
+  .navbar-heading-tittle{
+    font-size: 20px;
+  }
+  @media (max-width:340px){
+    .navbar-heading-tittle {
+        font-size: 18px;
+    }
+  }
