@@ -29,22 +29,27 @@ function TaskList() {
     }
   }, [tasks]);
 
-  const addTask = (text) => {
-    const newTask = { id: Date.now(), text, isCompleted: false, createdDate: new Date().toLocaleString(), completedDate: null };
+  const addTask = (text, dueDate) => {
+    const newTask = {
+      id: Date.now(),
+      text,
+      isCompleted: false,
+      dueDate: new Date(dueDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true }), // Format with AM/PM
+      completedDate: null,
+    };
     setTasks(prevTasks => [...prevTasks, newTask]);
   };
-  
 
   const updateTaskStatus = (id, status) => {
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === id
-          ? { ...task, isCompleted: status === 'Completed', completedDate: status === 'Completed' ? new Date().toLocaleString() : null }
+          ? { ...task, isCompleted: status === 'Completed', completedDate: status === 'Completed' ? new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', hour12: true }) : null }
           : task
       )
     );
   };
-  
+
   const filteredTasks = tasks.filter(task => {
     if (filter === 'All') return true;
     if (filter === 'Completed') return task.isCompleted;
@@ -121,51 +126,47 @@ function TaskList() {
       {filteredTasks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-          {filteredTasks.map((task) => (
-  <motion.div
-    key={task.id}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    className="bg-white border border-gray-300 rounded-lg shadow-md p-4 flex flex-col transition-transform duration-300"
-  >
-    <div className="flex-1">
-      <p className={`text-gray-700 ${task.isCompleted ? 'line-through' : ''}`}>
-        {task.text}
-      </p>
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: task.isCompleted ? 0 : 1, height: task.isCompleted ? 0 : 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ opacity: { duration: 0.3 }, height: { duration: 0.3, ease: "easeInOut" }}}
-        className="text-sm text-gray-500 overflow-hidden"
-      >
-        Created: {task.createdDate}
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: task.isCompleted ? 1 : 0, height: task.isCompleted ? 'auto' : 0 }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ opacity: { duration: 0.3 }, height: { duration: 0.3, ease: "easeInOut" }}}
-        className="text-sm text-gray-500 overflow-hidden"
-      >
-        Completed: {task.completedDate}
-      </motion.div>
-    </div>
-    <button
-      onClick={() => updateTaskStatus(task.id, task.isCompleted ? 'Incomplete' : 'Completed')}
-      className={`mt-4 px-4 py-2 rounded focus:outline-none ${
-        task.isCompleted ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'
-      }`}
-    >
-      {task.isCompleted ? 'Incomplete' : 'Complete'}
-    </button>
-  </motion.div>
-))}
-
-
-
-
+            {filteredTasks.map((task) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-white border border-gray-300 rounded-lg shadow-md p-4 flex flex-col transition-transform duration-300"
+              >
+                <div className="flex-1">
+                  <p className={`text-gray-700 ${task.isCompleted ? 'line-through' : ''}`}>
+                    {task.text}
+                  </p>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: task.isCompleted ? 0 : 1, height: task.isCompleted ? 0 : 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ opacity: { duration: 0.3 }, height: { duration: 0.3, ease: "easeInOut" }}}
+                    className="text-sm text-gray-500 overflow-hidden"
+                  >
+                    Due: {task.dueDate}
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: task.isCompleted ? 1 : 0, height: task.isCompleted ? 'auto' : 0 }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ opacity: { duration: 0.3 }, height: { duration: 0.3, ease: "easeInOut" }}}
+                    className="text-sm text-gray-500 overflow-hidden"
+                  >
+                    Completed: {task.completedDate}
+                  </motion.div>
+                </div>
+                <button
+                  onClick={() => updateTaskStatus(task.id, task.isCompleted ? 'Incomplete' : 'Completed')}
+                  className={`mt-4 px-4 py-2 rounded focus:outline-none ${
+                    task.isCompleted ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'
+                  }`}
+                >
+                  {task.isCompleted ? 'Incomplete' : 'Complete'}
+                </button>
+              </motion.div>
+            ))}
           </AnimatePresence>
         </div>
       ) : (
