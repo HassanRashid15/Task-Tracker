@@ -1,14 +1,10 @@
-import React from 'react';
-
 function Task({ task, onComplete, isCompleted }) {
   return (
     <div style={{ marginBottom: '10px', textDecoration: isCompleted ? 'line-through' : 'none' }}>
-        <div>
       <p>{task.text}</p>
-      </div>
-      <button onClick={() => onComplete(task.id)}> {isCompleted ? '' : 'Complete'}</button>
+      <p>Created: {task.createdDate}</p>
+      {isCompleted && <p>Completed: {task.completedDate}</p>}
+      <button onClick={() => onComplete(task.id)}> {isCompleted ? 'Incomplete' : 'Complete'}</button>
     </div>
   );
 }
-
-export default Task;
