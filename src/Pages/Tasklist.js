@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MdFilterList } from "react-icons/md";
+import React, { useState, useEffect, useRef } from 'react';
+import { MdFilterList, MdSort } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
 import TaskModal from './../Component/TaskModal';
@@ -8,11 +8,40 @@ function TaskList() {
   const [tasks, setTasks] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [filter, setFilter] = useState('All');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [sortOrder, setSortOrder] = useState('Newest');
+
+  const filterButtonRef = useRef(null);
+  const sortButtonRef = useRef(null);
+
+  const sortTasks = (tasks, order) => {
+    switch (order) {
+      case 'Newest':
+        return [...tasks].sort((a, b) => b.id - a.id);
+      case 'Oldest':
+        return [...tasks].sort((a, b) => a.id - b.id);
+      case 'A-Z':
+        return [...tasks].sort((a, b) => a.text.localeCompare(b.text));
+      case 'Z-A':
+        return [...tasks].sort((a, b) => b.text.localeCompare(a.text));
+      default:
+        return tasks;
+    }
+  };
+
+  const filteredAndSortedTasks = sortTasks(
+    tasks.filter(task => {
+      if (filter === 'All') return true;
+      if (filter === 'Completed') return task.isCompleted;
+      if (filter === 'Incomplete') return !task.isCompleted;
+      return true;
+    }),
+    sortOrder
+  );
 
   useEffect(() => {
     try {
-      console.log('Loading tasks from local storage...');
       const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
       setTasks(storedTasks);
     } catch (error) {
@@ -22,7 +51,6 @@ function TaskList() {
 
   useEffect(() => {
     try {
-      console.log('Saving tasks to local storage...');
       localStorage.setItem('tasks', JSON.stringify(tasks));
     } catch (error) {
       console.error("Failed to save tasks to local storage", error);
@@ -42,20 +70,36 @@ function TaskList() {
     );
   };
 
-  const filteredTasks = tasks.filter(task => {
-    if (filter === 'All') return true;
-    if (filter === 'Completed') return task.isCompleted;
-    if (filter === 'Incomplete') return !task.isCompleted;
-    return true;
-  });
+  const deleteTask = (id) => {
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+  };
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
+  const deleteAllTasks = () => {
+    setTasks([]);
+  };
+
+  const toggleFilterDropdown = () => {
+    setIsFilterDropdownOpen(!isFilterDropdownOpen);
+    if (isSortDropdownOpen) {
+      setIsSortDropdownOpen(false);
+    }
+  };
+
+  const toggleSortDropdown = () => {
+    setIsSortDropdownOpen(!isSortDropdownOpen);
+    if (isFilterDropdownOpen) {
+      setIsFilterDropdownOpen(false);
+    }
   };
 
   const handleFilterChange = (value) => {
     setFilter(value);
-    setIsDropdownOpen(false);
+    setIsFilterDropdownOpen(false);
+  };
+
+  const handleSortChange = (value) => {
+    setSortOrder(value);
+    setIsSortDropdownOpen(false);
   };
 
   return (
@@ -72,21 +116,34 @@ function TaskList() {
           </button>
         </div>
       </div>
-      <div className="relative mb-6 flex items-center">
+
+      <div className="relative mb-6 flex items-center space-x-4">
         <button
-          onClick={toggleDropdown}
+          ref={filterButtonRef}
+          onClick={toggleFilterDropdown}
           className="flex items-center px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1"
         >
           <MdFilterList className="text-gray-600" />
           <span className="hidden md:inline ml-2">{filter}</span>
         </button>
+
+        <button
+          ref={sortButtonRef}
+          onClick={toggleSortDropdown}
+          className="flex items-center px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1"
+        >
+          <MdSort className="text-gray-600" />
+          <span className="hidden md:inline ml-2">{sortOrder}</span>
+        </button>
+
         <AnimatePresence>
-          {isDropdownOpen && (
+          {isFilterDropdownOpen && (
             <motion.ul
-              className="absolute top-full bg-white border border-gray-300 rounded shadow-lg z-10"
+              className="absolute bg-white border border-gray-300 rounded shadow-lg z-10"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              style={{ top: filterButtonRef.current?.offsetHeight, left: 0 }}
             >
               <li
                 className="px-4 py-2 cursor-pointer hover:bg-gray-100"
@@ -108,17 +165,68 @@ function TaskList() {
               </li>
             </motion.ul>
           )}
+
+          {isSortDropdownOpen && (
+            <motion.ul
+              className="absolute bg-white border border-gray-300 rounded shadow-lg z-10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              style={{
+                top: sortButtonRef.current?.offsetHeight,
+                left: sortButtonRef.current?.offsetLeft
+              }}
+            >
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSortChange('Newest')}
+              >
+                Newest
+              </li>
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSortChange('Oldest')}
+              >
+                Oldest
+              </li>
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSortChange('A-Z')}
+              >
+                A-Z
+              </li>
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSortChange('Z-A')}
+              >
+                Z-A
+              </li>
+            </motion.ul>
+          )}
         </AnimatePresence>
       </div>
+
+      {tasks.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={deleteAllTasks}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Delete All Tasks
+          </button>
+        </div>
+      )}
+
       <TaskModal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         onAddTask={addTask}
       />
-      {filteredTasks.length > 0 ? (
+
+      {filteredAndSortedTasks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence>
-            {filteredTasks.map((task) => (
+            {filteredAndSortedTasks.map((task) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -129,22 +237,28 @@ function TaskList() {
                 <div className={`flex-1 ${task.isCompleted ? 'text-gray-700 line-through' : 'text-gray-700'}`}>
                   {task.text}
                 </div>
-                <button
-                  onClick={() => updateTaskStatus(task.id, task.isCompleted ? 'Incomplete' : 'Completed')}
-                  className={`mt-4 px-4 py-2 rounded focus:outline-none ${
-                    task.isCompleted ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'
-                  }`}
-                >
-                  {task.isCompleted ? 'Incomplete' : 'Complete'}
-                </button>
+                <div className="flex justify-between items-center mt-4">
+                  <button
+                    onClick={() => updateTaskStatus(task.id, task.isCompleted ? 'Incomplete' : 'Completed')}
+                    className={`px-4 py-2 rounded focus:outline-none ${
+                      task.isCompleted ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'
+                    }`}
+                  >
+                    {task.isCompleted ? 'Incomplete' : 'Complete'}
+                  </button>
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+                  >
+                    Delete
+                  </button>
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
       ) : (
-        <div className="text-center text-gray-500 py-4">
-          {filter === 'Completed' ? 'No completed tasks available.' : filter === 'Incomplete' ? 'No incomplete tasks available.' : 'No tasks assigned yet.'}
-        </div>
+        <div className="text-center text-gray-600 mt-4">No tasks found</div>
       )}
     </div>
   );
