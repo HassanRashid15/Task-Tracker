@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MdFilterList, MdSort } from "react-icons/md";
+import { MdFilterList, MdSort, MdDelete } from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
 import { motion, AnimatePresence } from 'framer-motion';
 import TaskModal from './../Component/TaskModal';
@@ -139,7 +139,7 @@ function TaskList() {
         <AnimatePresence>
           {isFilterDropdownOpen && (
             <motion.ul
-              className="absolute bg-white border border-gray-300 rounded shadow-lg z-10"
+              className="absolute filter-dropdown bg-white border border-gray-300 rounded shadow-lg z-10"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -168,7 +168,7 @@ function TaskList() {
 
           {isSortDropdownOpen && (
             <motion.ul
-              className="absolute bg-white border border-gray-300 rounded shadow-lg z-10"
+              className="absolute sorting-dropdown bg-white border border-gray-300 rounded shadow-lg z-10"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -248,9 +248,10 @@ function TaskList() {
                   </button>
                   <button
                     onClick={() => deleteTask(task.id)}
-                    className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+                    className="px-4 py-2 flex items-center"
+                    aria-label="Delete task"
                   >
-                    Delete
+                    <MdDelete className="text-red-500 text-2xl ml-2" />
                   </button>
                 </div>
               </motion.div>

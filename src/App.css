@@ -4,3 +4,10 @@ padding-left:19px !important;
 padding-top: 60px !important;
 padding-right: 19px !important;
   } 
+  .filter-dropdown{
+    margin-left: 0px !important;
+  }
+  .sorting-dropdown{
+    margin-left: 0px !important;
+    
+  }
