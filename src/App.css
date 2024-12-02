@@ -4,3 +4,16 @@ padding-left:19px !important;
 padding-top: 60px !important;
 padding-right: 19px !important;
   } 
+  .kanban-board {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.kanban-column {
+  width: 23%;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9fafb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
